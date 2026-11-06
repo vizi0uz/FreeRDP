@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_title" translatable="false">aFreeRDP</string>
+    <string name="app_title" translatable="false">aFreeRDP custom</string>
+    <!-- Overrides freeRDPCore's label, so this build's service is told apart from F-Droid's
+         in Settings > Accessibility. -->
+    <string name="accessibility_keyboard_label" translatable="false">aFreeRDP custom Physical Keyboard</string>
     <!-- Search strings -->
 </resources>

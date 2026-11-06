@@ -6,7 +6,7 @@
     <application
         android:name="com.freerdp.afreerdp.application.GlobalApp"
         android:icon="@mipmap/ic_launcher"
-        android:label="aFreeRDP"
+        android:label="@string/app_title"
         android:resizeableActivity="true">
 
         <!-- Main activity -->

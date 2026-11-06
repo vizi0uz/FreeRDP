@@ -4,7 +4,7 @@ android {
     buildToolsVersion = rootProject.ext.toolsVersion
 
     defaultConfig {
-        applicationId "com.freerdp.afreerdp"
+        applicationId "com.freerdp.afreerdp.custom"
         minSdkVersion rootProject.ext.minApi
         targetSdkVersion rootProject.ext.targetApi
         versionName = rootProject.ext.versionName
