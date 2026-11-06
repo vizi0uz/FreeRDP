@@ -1,0 +1,67 @@
+# Builds aFreeRDP for one phone (arm64-v8a) from the custom-build branch, as a side-by-side
+# package (com.freerdp.afreerdp.custom). The steps follow F-Droid's recipe for aFreeRDP 3.32.1:
+# the same apt packages, NDK and CMake. The APK is signed with a throwaway key generated in
+# the run; it is re-signed on the phone before installing, so no key ever reaches this repo.
+name: aFreeRDP custom build
+
+on:
+  push:
+    branches: [custom-build]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    defaults:
+      run:
+        working-directory: client/Android/Studio
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Build tools (F-Droid's list)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential file libncurses6 make nasm pkg-config meson gawk
+
+      - name: NDK and CMake
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;29.0.13113456" "cmake;4.1.2"
+
+      - name: release.properties and a throwaway signing key
+        run: |
+          pass="$(openssl rand -hex 24)"
+          keytool -genkeypair -keystore "$RUNNER_TEMP/ci.jks" -storetype JKS -alias ci \
+            -keyalg RSA -keysize 2048 -validity 30 -dname "CN=throwaway" \
+            -storepass "$pass" -keypass "$pass"
+          cat > release.properties <<EOF
+          SPLIT_ARCHITECTURES=arm64-v8a
+          ABI_FILTERS=arm64-v8a
+          BUILD_UNIVERSAL=false
+          VERSION_NAME=3.33.0-custom.${{ github.run_number }}
+          VERSION_CODE=${{ github.run_number }}
+          CMAKE_VERSION=4.1.2
+          NDK_VERSION=29.0.13113456
+          RELEASE_STORE_FILE=$RUNNER_TEMP/ci.jks
+          RELEASE_KEY_ALIAS=ci
+          RELEASE_KEY_PASSWORD=$pass
+          RELEASE_STORE_PASSWORD=$pass
+          EOF
+
+      - name: Gradle
+        run: ./gradlew --no-daemon --stacktrace assembleRelease
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aFreeRDP-custom-${{ github.run_number }}
+          path: client/Android/Studio/aFreeRDP/build/outputs/apk/release/*.apk
+          if-no-files-found: error
