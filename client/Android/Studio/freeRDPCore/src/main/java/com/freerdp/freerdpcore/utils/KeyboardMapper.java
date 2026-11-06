@@ -673,7 +673,7 @@ public class KeyboardMapper
 	// A physical keyboard's positions are what the server's layout is meant to read.
 	private static boolean sendsKeyAsUnicode(KeyEvent event)
 	{
-		return event.getDeviceId() == KeyCharacterMap.VIRTUAL_KEYBOARD;
+		return true;
 	}
 
 	// FREERDP_CLIENT_KBD_MOD in include/freerdp/client.h, for the modifiers the toggles hold
