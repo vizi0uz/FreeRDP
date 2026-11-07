@@ -722,10 +722,10 @@ public class KeyboardMapper
 		if (pendingAccent != 0)
 		{
 			// The same dead key twice types the accent; two different ones, the first accent.
-			int composed = KeyEvent.getDeadChar(pendingAccent, accent);
-			listener.processKeyAsUnicode(pendingAccentVk, composed != 0 ? composed : pendingAccent);
+			listener.processKeyAsUnicode(pendingAccentVk, pendingAccent);
+			boolean same = accent == pendingAccent;
 			pendingAccent = 0;
-			if (composed != 0)
+			if (same)
 				return;
 		}
 		pendingAccent = accent;
@@ -733,10 +733,12 @@ public class KeyboardMapper
 	}
 
 	// A character after a dead key: the composed character, or the accent and then the character
-	// when they do not compose.
+	// when they do not compose. Space types the accent itself, as Android's text fields and
+	// Windows do: getDeadChar turns the acute accent and Space into an apostrophe on Android 17.
 	private void processAccentedKey(int vk, int unicode)
 	{
-		int composed = KeyEvent.getDeadChar(pendingAccent, unicode);
+		int composed =
+		    unicode == ' ' ? pendingAccent : KeyEvent.getDeadChar(pendingAccent, unicode);
 		if (composed != 0)
 			listener.processKeyAsUnicode(pendingAccentVk, composed);
 		else
