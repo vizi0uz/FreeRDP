@@ -485,10 +485,15 @@ public class SessionInputManager
 	{
 		if (instance == 0)
 			return;
-		// Without unicode input the library gets no character and sends the scancode.
-		int unicode = LibFreeRDP.isUnicodeInputSupported(instance) ? unicodeKey : 0;
-		LibFreeRDP.sendKeyAsUnicodeEvent(instance, virtualKeyCode, unicode, modifiers, true);
-		LibFreeRDP.sendKeyAsUnicodeEvent(instance, virtualKeyCode, unicode, modifiers, false);
+		// The library sends no character to a server without unicode input, so the character
+		// goes the way processUnicodeKey sends it there: as US key positions, with their Shift.
+		if (unicodeKey != 0 && !LibFreeRDP.isUnicodeInputSupported(instance))
+		{
+			keyboardMapper.processUnicodeFallback(unicodeKey);
+			return;
+		}
+		LibFreeRDP.sendKeyAsUnicodeEvent(instance, virtualKeyCode, unicodeKey, modifiers, true);
+		LibFreeRDP.sendKeyAsUnicodeEvent(instance, virtualKeyCode, unicodeKey, modifiers, false);
 	}
 
 	@Override public void switchKeyboard(int keyboardType)
