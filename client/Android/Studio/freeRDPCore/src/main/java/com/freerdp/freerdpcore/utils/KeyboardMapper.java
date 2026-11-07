@@ -733,8 +733,8 @@ public class KeyboardMapper
 	}
 
 	// A character after a dead key: the composed character, or the accent and then the character
-	// when they do not compose. Space types the accent itself, as Android's text fields and
-	// Windows do: getDeadChar turns the acute accent and Space into an apostrophe on Android 17.
+	// when they do not compose. Space types the accent itself: getDeadChar returned an apostrophe
+	// for the acute accent and Space on a Pixel 9 Pro running Android 17.
 	private void processAccentedKey(int vk, int unicode)
 	{
 		int composed =

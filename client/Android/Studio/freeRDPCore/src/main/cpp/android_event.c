@@ -174,7 +174,7 @@ static BOOL android_process_event(ANDROID_EVENT_QUEUE* queue, freerdp* inst)
 				ANDROID_EVENT_KEY_AS_UNICODE* key_event = (ANDROID_EVENT_KEY_AS_UNICODE*)event;
 
 				/* Key combinations never take this path: the Java side sends them as virtual
-				 * keys, so no modifier is down here. */
+				 * keys, so no Ctrl, Alt or Win is down here. */
 				rc = freerdp_client_send_key_as_unicode(&afc->common, key_event->flags,
 				                                        key_event->str, key_event->scancode,
 				                                        FREERDP_CLIENT_KBD_MOD_NONE);
