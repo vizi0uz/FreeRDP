@@ -481,19 +481,17 @@ public class SessionInputManager
 			keyboardMapper.processUnicodeFallback(unicodeKey);
 	}
 
-	@Override public void processKeyAsUnicode(int virtualKeyCode, int unicodeKey, int modifiers)
+	@Override public boolean isUnicodeInputSupported()
+	{
+		return instance != 0 && LibFreeRDP.isUnicodeInputSupported(instance);
+	}
+
+	@Override public void processKeyAsUnicode(int virtualKeyCode, int unicodeKey)
 	{
 		if (instance == 0)
 			return;
-		// The library sends no character to a server without unicode input, so the character
-		// goes the way processUnicodeKey sends it there: as US key positions, with their Shift.
-		if (unicodeKey != 0 && !LibFreeRDP.isUnicodeInputSupported(instance))
-		{
-			keyboardMapper.processUnicodeFallback(unicodeKey);
-			return;
-		}
-		LibFreeRDP.sendKeyAsUnicodeEvent(instance, virtualKeyCode, unicodeKey, modifiers, true);
-		LibFreeRDP.sendKeyAsUnicodeEvent(instance, virtualKeyCode, unicodeKey, modifiers, false);
+		LibFreeRDP.sendKeyAsUnicodeEvent(instance, virtualKeyCode, unicodeKey, true);
+		LibFreeRDP.sendKeyAsUnicodeEvent(instance, virtualKeyCode, unicodeKey, false);
 	}
 
 	@Override public void switchKeyboard(int keyboardType)
