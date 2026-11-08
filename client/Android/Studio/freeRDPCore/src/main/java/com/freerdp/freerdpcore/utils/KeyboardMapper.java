@@ -535,9 +535,10 @@ public class KeyboardMapper
 						if (shift)
 							listener.processVirtualKey(VK_LSHIFT, true);
 						// AltGr produced the character, so it is not a modifier the server should
-						// see: with it in the mask the library would send the scancode.
-						int modmask =
-						    getKeyboardModifiers(altGr ? meta & ~KeyEvent.META_ALT_RIGHT_ON : meta);
+						// see: with it in the mask the library would send the scancode. The generic
+						// Alt bit goes too, or it would count as the left Alt.
+						int altGrBits = KeyEvent.META_ALT_RIGHT_ON | KeyEvent.META_ALT_ON;
+						int modmask = getKeyboardModifiers(altGr ? meta & ~altGrBits : meta);
 						if (deadKey && listener.isUnicodeInputSupported())
 							processDeadKey(event, vk, modmask);
 						else if (pendingAccent != 0 && unicode != 0)
@@ -755,9 +756,23 @@ public class KeyboardMapper
 	}
 
 	// The modifiers Android reports for the event, as the library's FREERDP_CLIENT_KBD_MOD mask.
-	// Meta is the closest Android has to the Windows key.
+	// Meta is the closest Android has to the Windows key. An event may carry only the generic bit
+	// (META_CTRL_ON without a side), which counts as the left key.
 	private static int getKeyboardModifiers(int metaState)
 	{
+		if ((metaState & KeyEvent.META_SHIFT_ON) != 0 &&
+		    (metaState & (KeyEvent.META_SHIFT_LEFT_ON | KeyEvent.META_SHIFT_RIGHT_ON)) == 0)
+			metaState |= KeyEvent.META_SHIFT_LEFT_ON;
+		if ((metaState & KeyEvent.META_ALT_ON) != 0 &&
+		    (metaState & (KeyEvent.META_ALT_LEFT_ON | KeyEvent.META_ALT_RIGHT_ON)) == 0)
+			metaState |= KeyEvent.META_ALT_LEFT_ON;
+		if ((metaState & KeyEvent.META_CTRL_ON) != 0 &&
+		    (metaState & (KeyEvent.META_CTRL_LEFT_ON | KeyEvent.META_CTRL_RIGHT_ON)) == 0)
+			metaState |= KeyEvent.META_CTRL_LEFT_ON;
+		if ((metaState & KeyEvent.META_META_ON) != 0 &&
+		    (metaState & (KeyEvent.META_META_LEFT_ON | KeyEvent.META_META_RIGHT_ON)) == 0)
+			metaState |= KeyEvent.META_META_LEFT_ON;
+
 		int modmask = 0;
 		if ((metaState & KeyEvent.META_SHIFT_LEFT_ON) != 0)
 			modmask |= LibFreeRDP.KBD_MOD_LSHIFT;
